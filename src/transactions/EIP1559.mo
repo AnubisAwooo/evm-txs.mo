@@ -218,14 +218,21 @@ module EIP1559 {
             AU.fromText(tx.to),
             AU.fromNat64(tx.value),
             AU.fromText(tx.data),
-            Helper.encodeAccessList(tx.accessList),
+        ];
+
+        let buf = Buffer.Buffer<RlpTypes.Input>(items.size() + 4);
+        for (item in items.vals()) {
+            buf.add(#Uint8Array(Buffer.fromArray(item)));
+        };
+
+        buf.add(Helper.deserializeAccessList(tx.accessList));
+
+        let items2 : [[Nat8]] = [
             AU.fromText(tx.v),
             AU.fromText(tx.r),
             AU.fromText(tx.s),
         ];
-
-        let buf = Buffer.Buffer<RlpTypes.Input>(items.size());
-        for(item in items.vals()) {
+        for (item in items2.vals()) {
             buf.add(#Uint8Array(Buffer.fromArray(item)));
         };
 
