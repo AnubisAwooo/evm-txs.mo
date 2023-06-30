@@ -16,20 +16,20 @@ import Helper "Helper";
 
 module Legacy {
     public func from(
-        data: ([Nat8], Nat64)
-    ): Result.Result<Types.TransactionLegacy, Text> {
-        switch(Rlp.decode(#Uint8Array(Buffer.fromArray(data.0)))) {
+        data : ([Nat8], Nat64)
+    ) : Result.Result<Types.TransactionLegacy, Text> {
+        switch (Rlp.decode(#Uint8Array(Buffer.fromArray(data.0)))) {
             case (#err(msg)) {
                 return #err(msg);
             };
             case (#ok(dec)) {
-                switch(dec) {
+                switch (dec) {
                     case (#Nested(list)) {
-                        let nonce = RlpUtils.getAsNat64(list.get(0));
-                        let gasPrice = RlpUtils.getAsNat64(list.get(1));
-                        let gasLimit = RlpUtils.getAsNat64(list.get(2));
+                        let nonce = RlpUtils.getAsNat(list.get(0));
+                        let gasPrice = RlpUtils.getAsNat(list.get(1));
+                        let gasLimit = RlpUtils.getAsNat(list.get(2));
                         let to = RlpUtils.getAsText(list.get(3));
-                        let value = RlpUtils.getAsNat64(list.get(4));
+                        let value = RlpUtils.getAsNat(list.get(4));
                         let dataTx = RlpUtils.getAsText(list.get(5));
                         let v = RlpUtils.getAsText(list.get(6));
                         let r = RlpUtils.getAsText(list.get(7));
@@ -59,28 +59,28 @@ module Legacy {
     };
 
     public func getMessageToSign(
-        tx: Types.TransactionLegacy
-    ): Result.Result<[Nat8], Text> {
-        
-        let items: [[Nat8]] = [
-            AU.fromNat64(tx.nonce),
-            AU.fromNat64(tx.gasPrice),
-            AU.fromNat64(tx.gasLimit),
+        tx : Types.TransactionLegacy
+    ) : Result.Result<[Nat8], Text> {
+
+        let items : [[Nat8]] = [
+            AU.fromNat(tx.nonce),
+            AU.fromNat(tx.gasPrice),
+            AU.fromNat(tx.gasLimit),
             AU.fromText(tx.to),
-            AU.fromNat64(tx.value),
+            AU.fromNat(tx.value),
             AU.fromText(tx.data),
             AU.fromNat64(tx.chainId),
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size() + 2);
-        for(item in items.vals()) {
+        for (item in items.vals()) {
             buf.add(#Uint8Array(Buffer.fromArray(item)));
         };
 
         buf.add(#Null);
         buf.add(#Null);
 
-        switch(Rlp.encode(#List(buf))) {
+        switch (Rlp.encode(#List(buf))) {
             case (#err(msg)) {
                 return #err(msg);
             };
@@ -92,11 +92,11 @@ module Legacy {
     };
 
     public func sign(
-        tx: Types.TransactionLegacy,
-        signature: [Nat8],
-        publicKey: [Nat8],
+        tx : Types.TransactionLegacy,
+        signature : [Nat8],
+        publicKey : [Nat8],
         ctx: Ecmult.ECMultContext
-    ): Result.Result<Types.TransactionLegacy, Text> {
+    ) : Result.Result<Types.TransactionLegacy, Text> {
         let chain_id = tx.chainId;
 
         let r_remove_leading_zeros = AU.stripLeft(
@@ -107,12 +107,12 @@ module Legacy {
         let r = AU.toText(r_remove_leading_zeros);
         let s = AU.toText(s_remove_leading_zeros);
 
-        switch(getMessageToSign(tx)) {
+        switch (getMessageToSign(tx)) {
             case (#err(msg)) {
                 return #err(msg);
             };
             case (#ok(message)) {
-                switch(Helper.getRecoveryId(message, signature, publicKey, ctx)) {
+                switch (Helper.getRecoveryId(message, signature, publicKey, ctx)) {
                     case (#err(msg)) {
                         return #err(msg);
                     };
@@ -134,17 +134,17 @@ module Legacy {
     };
 
     public func signAndSerialize(
-        tx: Types.TransactionLegacy,
-        signature: [Nat8],
-        publicKey: [Nat8],
+        tx : Types.TransactionLegacy,
+        signature : [Nat8],
+        publicKey : [Nat8],
         ctx: Ecmult.ECMultContext
-    ): Result.Result<(Types.TransactionLegacy, [Nat8]), Text> {
-        switch(sign(tx, signature, publicKey, ctx)) {
+    ) : Result.Result<(Types.TransactionLegacy, [Nat8]), Text> {
+        switch (sign(tx, signature, publicKey, ctx)) {
             case (#err(msg)) {
                 return #err(msg);
             };
             case (#ok(signedTx)) {
-                switch(serialize(signedTx)) {
+                switch (serialize(signedTx)) {
                     case (#err(msg)) {
                         return #err(msg);
                     };
@@ -157,15 +157,15 @@ module Legacy {
     };
 
     public func isSigned(
-        tx: Types.TransactionLegacy
-    ): Bool {
-        let r = if(Text.startsWith(tx.r, #text("0x"))) {
+        tx : Types.TransactionLegacy
+    ) : Bool {
+        let r = if (Text.startsWith(tx.r, #text("0x"))) {
             TU.right(tx.r, 2);
         } else {
             tx.r;
         };
 
-        let s = if(Text.startsWith(tx.s, #text("0x"))) {
+        let s = if (Text.startsWith(tx.s, #text("0x"))) {
             TU.right(tx.s, 2);
         } else {
             tx.s;
@@ -175,9 +175,9 @@ module Legacy {
     };
 
     public func getSignature(
-        tx: Types.TransactionLegacy
-    ): Result.Result<[Nat8], Text> {
-        if(not isSigned(tx)) {
+        tx : Types.TransactionLegacy
+    ) : Result.Result<[Nat8], Text> {
+        if (not isSigned(tx)) {
             return #err("This is not a signed transaction");
         };
 
@@ -191,12 +191,12 @@ module Legacy {
     };
 
     public func getRecoveryId(
-        tx: Types.TransactionLegacy
-    ): Result.Result<Nat8, Text> {
-        if(not isSigned(tx)) {
+        tx : Types.TransactionLegacy
+    ) : Result.Result<Nat8, Text> {
+        if (not isSigned(tx)) {
             return #err("This is not a signed transaction");
         };
-        
+
         let chain_id = tx.chainId;
         let v = AU.fromText(tx.v);
 
@@ -205,15 +205,15 @@ module Legacy {
     };
 
     public func serialize(
-        tx: Types.TransactionLegacy
-    ): Result.Result<[Nat8], Text> {
+        tx : Types.TransactionLegacy
+    ) : Result.Result<[Nat8], Text> {
 
-        let items: [[Nat8]] = [
-            AU.fromNat64(tx.nonce),
-            AU.fromNat64(tx.gasPrice),
-            AU.fromNat64(tx.gasLimit),
+        let items : [[Nat8]] = [
+            AU.fromNat(tx.nonce),
+            AU.fromNat(tx.gasPrice),
+            AU.fromNat(tx.gasLimit),
             AU.fromText(tx.to),
-            AU.fromNat64(tx.value),
+            AU.fromNat(tx.value),
             AU.fromText(tx.data),
             AU.fromText(tx.v),
             AU.fromText(tx.r),
@@ -221,11 +221,11 @@ module Legacy {
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size());
-        for(item in items.vals()) {
+        for (item in items.vals()) {
             buf.add(#Uint8Array(Buffer.fromArray(item)));
         };
 
-        switch(Rlp.encode(#List(buf))) {
+        switch (Rlp.encode(#List(buf))) {
             case (#err(msg)) {
                 return #err(msg);
             };

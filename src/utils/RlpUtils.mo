@@ -1,4 +1,5 @@
 import Buffer "mo:base/Buffer";
+import Nat "mo:base/Nat";
 import RlpTypes "mo:rlp/types";
 import AU "ArrayUtils";
 
@@ -14,6 +15,12 @@ module {
                 return [];
             };
         };
+    };
+
+    public func getAsNat(
+        dec : RlpTypes.Decoded
+    ) : Nat {
+        return AU.toNat(getAsValue(dec));
     };
 
     public func getAsNat64(

@@ -1,6 +1,7 @@
 import Nat "mo:base/Nat";
 import Buffer "mo:base/Buffer";
 import Array "mo:base/Array";
+import List "mo:base/List";
 import Nat64 "mo:base/Nat64";
 import Nat32 "mo:base/Nat32";
 import Nat8 "mo:base/Nat8";
@@ -84,6 +85,29 @@ module {
         };
 
         return Buffer.toArray(res);
+    };
+
+    public func toNat(array : [Nat8]) : Nat {
+        var value : Nat = 0;
+
+        for (byte in array.vals()) {
+            value := (value * 256) + Nat8.toNat(byte);
+        };
+
+        return value;
+    };
+
+    func _fromNat(list : List.List<Nat8>, value : Nat, byte : Nat) : List.List<Nat8> {
+        var list2 = List.push(Nat8.fromNat(byte), list);
+        if (value != 0) {
+            list2 := _fromNat(list2, value / 256, value % 256);
+        };
+        list2;
+    };
+
+    public func fromNat(value : Nat) : [Nat8] {
+        let list = _fromNat(List.nil<Nat8>(), value / 256, value % 256);
+        List.toArray(list);
     };
 
     public func toNat64(

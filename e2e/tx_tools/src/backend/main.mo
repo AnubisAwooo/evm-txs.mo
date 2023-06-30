@@ -10,18 +10,18 @@ import HashMap "mo:base/HashMap";
 import IcEcdsaApi "IcEcdsaApi";
 import Types "Types";
 
-shared({caller = owner}) actor class TxTools(
-    network: IcEcdsaApi.Network
+shared ({ caller = owner }) actor class TxTools(
+    network : IcEcdsaApi.Network
 ) = this {
-    let keyName: Text = switch network {
+    let keyName : Text = switch network {
         case (#Localhost) "dfx_test_key";
         case _ "test_key_1"
     };
 
     type User = {
-        nonce: Nat64;
-        address: Text;
-        publicKey: [Nat8];
+        nonce : Nat;
+        address : Text;
+        publicKey : [Nat8];
     };
 
     let icEcdsaApi = IcEcdsaApi.IcEcdsaApi();
@@ -33,20 +33,20 @@ shared({caller = owner}) actor class TxTools(
         let principalId = msg.caller;
         let derivationPath = [Principal.toBlob(principalId)];
 
-        switch(users.get(principalId)) {
+        switch (users.get(principalId)) {
             case (?_) return #err("Address already created for user");
             case null ();
         };
 
-        switch(await* Address.create(keyName, derivationPath, icEcdsaApi)) {
+        switch (await* Address.create(keyName, derivationPath, icEcdsaApi)) {
             case (#err(msg)) {
                 return #err(msg);
             };
             case (#ok(res)) {
                 users.put(principalId, {
-                    nonce = 0;
-                    address = res.0;
-                    publicKey = res.1;
+                        nonce = 0;
+                        address = res.0;
+                        publicKey = res.1;
                 });
 
                 return #ok({
@@ -56,14 +56,14 @@ shared({caller = owner}) actor class TxTools(
         };
     };
 
-    public shared(msg) func sign_evm_tx(
-        hex_raw_tx: [Nat8],
+    public shared (msg) func sign_evm_tx(
+        hex_raw_tx : [Nat8],
         chain_id: Nat64
-    ): async Result.Result<Types.SignTransactionResponse, Text> {
+    ) : async Result.Result<Types.SignTransactionResponse, Text> {
         let principalId = msg.caller;
         let derivationPath = [Principal.toBlob(principalId)];
 
-        let user = switch(users.get(principalId)) {
+        let user = switch (users.get(principalId)) {
             case null return #err("Unknown user");
             case (?key) key;
         };
@@ -83,23 +83,23 @@ shared({caller = owner}) actor class TxTools(
         };
     };
 
-    public shared(msg) func deploy_evm_contract(
-        bytecode: [Nat8],
-        chain_id: Nat64,
-        max_priority_fee_per_gas: Nat64,
-        gas_limit: Nat64,
-        max_fee_per_gas: Nat64
-    ): async Result.Result<Types.DeployEVMContractResponse, Text> {
+    public shared (msg) func deploy_evm_contract(
+        bytecode : [Nat8],
+        chain_id : Nat64,
+        max_priority_fee_per_gas : Nat,
+        gas_limit : Nat,
+        max_fee_per_gas : Nat,
+    ) : async Result.Result<Types.DeployEVMContractResponse, Text> {
         let principalId = msg.caller;
         let derivationPath = [Principal.toBlob(principalId)];
 
-        let user = switch(users.get(principalId)) {
+        let user = switch (users.get(principalId)) {
             case null return #err("Unknown user");
             case (?key) key;
         };
 
         switch(await* Contract.signDeployment(
-            bytecode, 
+                bytecode,
             max_priority_fee_per_gas, gas_limit, max_fee_per_gas, chain_id, 
             keyName, derivationPath, user.publicKey, user.nonce, 
             ecCtx, icEcdsaApi)) {
@@ -110,7 +110,7 @@ shared({caller = owner}) actor class TxTools(
                 ignore users.replace(principalId, {
                     user
                     with
-                    nonce = user.nonce + 1;
+                        nonce = user.nonce + 1;
                 });
 
                 return #ok({

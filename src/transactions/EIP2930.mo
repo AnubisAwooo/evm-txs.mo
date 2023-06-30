@@ -16,21 +16,21 @@ import Helper "Helper";
 
 module EIP2930 {
     public func from(
-        data: [Nat8]
-    ): Result.Result<Types.Transaction2930, Text> {
-        switch(Rlp.decode(#Uint8Array(Buffer.fromArray(AU.right(data, 1))))) {
+        data : [Nat8]
+    ) : Result.Result<Types.Transaction2930, Text> {
+        switch (Rlp.decode(#Uint8Array(Buffer.fromArray(AU.right(data, 1))))) {
             case (#err(msg)) {
                 return #err(msg);
             };
             case (#ok(dec)) {
-                switch(dec) {
+                switch (dec) {
                     case (#Nested(list)) {
                         let chainId = RlpUtils.getAsNat64(list.get(0));
-                        let nonce = RlpUtils.getAsNat64(list.get(1));
-                        let gasPrice = RlpUtils.getAsNat64(list.get(2));
-                        let gasLimit = RlpUtils.getAsNat64(list.get(3));
+                        let nonce = RlpUtils.getAsNat(list.get(1));
+                        let gasPrice = RlpUtils.getAsNat(list.get(2));
+                        let gasLimit = RlpUtils.getAsNat(list.get(3));
                         let to = RlpUtils.getAsText(list.get(4));
-                        let value = RlpUtils.getAsNat64(list.get(5));
+                        let value = RlpUtils.getAsNat(list.get(5));
                         let dataTx = RlpUtils.getAsText(list.get(6));
                         let accessList = Helper.serializeAccessList(list.get(7));
                         let v = RlpUtils.getAsText(list.get(8));
@@ -60,27 +60,27 @@ module EIP2930 {
     };
 
     public func getMessageToSign(
-        tx: Types.Transaction2930
-    ): Result.Result<[Nat8], Text> {
-        
-        let items: [[Nat8]] = [
+        tx : Types.Transaction2930
+    ) : Result.Result<[Nat8], Text> {
+
+        let items : [[Nat8]] = [
             AU.fromNat64(tx.chainId),
-            AU.fromNat64(tx.nonce),
-            AU.fromNat64(tx.gasPrice),
-            AU.fromNat64(tx.gasLimit),
+            AU.fromNat(tx.nonce),
+            AU.fromNat(tx.gasPrice),
+            AU.fromNat(tx.gasLimit),
             AU.fromText(tx.to),
-            AU.fromNat64(tx.value),
+            AU.fromNat(tx.value),
             AU.fromText(tx.data),
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size() + 1);
-        for(item in items.vals()) {
+        for (item in items.vals()) {
             buf.add(#Uint8Array(Buffer.fromArray(item)));
         };
 
         buf.add(Helper.deserializeAccessList(tx.accessList));
 
-        switch(Rlp.encode(#List(buf))) {
+        switch (Rlp.encode(#List(buf))) {
             case (#err(msg)) {
                 return #err(msg);
             };
@@ -94,11 +94,11 @@ module EIP2930 {
     };
 
     public func sign(
-        tx: Types.Transaction2930,
-        signature: [Nat8],
-        publicKey: [Nat8],
+        tx : Types.Transaction2930,
+        signature : [Nat8],
+        publicKey : [Nat8],
         ctx: Ecmult.ECMultContext
-    ): Result.Result<Types.Transaction2930, Text> {
+    ) : Result.Result<Types.Transaction2930, Text> {
         let chain_id = tx.chainId;
 
         let r_remove_leading_zeros = AU.stripLeft(
@@ -109,17 +109,17 @@ module EIP2930 {
         let r = AU.toText(r_remove_leading_zeros);
         let s = AU.toText(s_remove_leading_zeros);
 
-        switch(getMessageToSign(tx)) {
+        switch (getMessageToSign(tx)) {
             case (#err(msg)) {
                 return #err(msg);
             };
             case (#ok(message)) {
-                switch(Helper.getRecoveryId(message, signature, publicKey, ctx)) {
+                switch (Helper.getRecoveryId(message, signature, publicKey, ctx)) {
                     case (#err(msg)) {
                         return #err(msg);
                     };
                     case (#ok(recovery_id)) {
-                        let v = if(recovery_id == 0) "" else "01";
+                        let v = if (recovery_id == 0) "" else "01";
 
                         return #ok({
                             tx
@@ -135,17 +135,17 @@ module EIP2930 {
     };
 
     public func signAndSerialize(
-        tx: Types.Transaction2930,
-        signature: [Nat8],
-        publicKey: [Nat8],
+        tx : Types.Transaction2930,
+        signature : [Nat8],
+        publicKey : [Nat8],
         ctx: Ecmult.ECMultContext
-    ): Result.Result<(Types.Transaction2930, [Nat8]), Text> {
-        switch(sign(tx, signature, publicKey, ctx)) {
+    ) : Result.Result<(Types.Transaction2930, [Nat8]), Text> {
+        switch (sign(tx, signature, publicKey, ctx)) {
             case (#err(msg)) {
                 return #err(msg);
             };
             case (#ok(signedTx)) {
-                switch(serialize(signedTx)) {
+                switch (serialize(signedTx)) {
                     case (#err(msg)) {
                         return #err(msg);
                     };
@@ -158,15 +158,15 @@ module EIP2930 {
     };
 
     public func isSigned(
-        tx: Types.Transaction2930
-    ): Bool {
-        let r = if(Text.startsWith(tx.r, #text("0x"))) {
+        tx : Types.Transaction2930
+    ) : Bool {
+        let r = if (Text.startsWith(tx.r, #text("0x"))) {
             TU.right(tx.r, 2);
         } else {
             tx.r;
         };
 
-        let s = if(Text.startsWith(tx.s, #text("0x"))) {
+        let s = if (Text.startsWith(tx.s, #text("0x"))) {
             TU.right(tx.s, 2);
         } else {
             tx.s;
@@ -176,9 +176,9 @@ module EIP2930 {
     };
 
     public func getSignature(
-        tx: Types.Transaction2930
-    ): Result.Result<[Nat8], Text> {
-        if(not isSigned(tx)) {
+        tx : Types.Transaction2930
+    ) : Result.Result<[Nat8], Text> {
+        if (not isSigned(tx)) {
             return #err("This is not a signed transaction");
         };
 
@@ -192,28 +192,28 @@ module EIP2930 {
     };
 
     public func getRecoveryId(
-        tx: Types.Transaction2930
-    ): Result.Result<Nat8, Text> {
-        if(not isSigned(tx)) {
+        tx : Types.Transaction2930
+    ) : Result.Result<Nat8, Text> {
+        if (not isSigned(tx)) {
             return #err("This is not a signed transaction");
         };
-        
+
         let v = AU.fromText(tx.v);
 
-        return if(v.size() == 0) #ok(0) else #ok(1);
+        return if (v.size() == 0) #ok(0) else #ok(1);
     };
 
     public func serialize(
-        tx: Types.Transaction2930
-    ): Result.Result<[Nat8], Text> {
+        tx : Types.Transaction2930
+    ) : Result.Result<[Nat8], Text> {
 
-        let items: [[Nat8]] = [
+        let items : [[Nat8]] = [
             AU.fromNat64(tx.chainId),
-            AU.fromNat64(tx.nonce),
-            AU.fromNat64(tx.gasPrice),
-            AU.fromNat64(tx.gasLimit),
+            AU.fromNat(tx.nonce),
+            AU.fromNat(tx.gasPrice),
+            AU.fromNat(tx.gasLimit),
             AU.fromText(tx.to),
-            AU.fromNat64(tx.value),
+            AU.fromNat(tx.value),
             AU.fromText(tx.data),
         ];
 
@@ -233,7 +233,7 @@ module EIP2930 {
             buf.add(#Uint8Array(Buffer.fromArray(item)));
         };
 
-        switch(Rlp.encode(#List(buf))) {
+        switch (Rlp.encode(#List(buf))) {
             case (#err(msg)) {
                 return #err(msg);
             };

@@ -8,19 +8,19 @@ import EcdsaApi "interfaces/EcdsaApi";
 
 module {
     public func signDeployment(
-        bytecode: [Nat8],
-        maxPriorityFeePerGas: Nat64,
-        gasLimit: Nat64,
-        maxFeePerGas: Nat64,
-        chainId: Nat64,
-        keyName: Text,
-        derivationPath: [Blob],
-        publicKey: [Nat8],
-        nonce: Nat64,
-        context: Ecmult.ECMultContext,
+        bytecode : [Nat8],
+        maxPriorityFeePerGas : Nat,
+        gasLimit : Nat,
+        maxFeePerGas : Nat,
+        chainId : Nat64,
+        keyName : Text,
+        derivationPath : [Blob],
+        publicKey : [Nat8],
+        nonce : Nat,
+        context : Ecmult.ECMultContext,
         api: EcdsaApi.API
-    ): async* Result.Result<(Types.TransactionType, [Nat8]), Text> {
-        let tx: Types.Transaction1559 = {
+    ) : async* Result.Result<(Types.TransactionType, [Nat8]), Text> {
+        let tx : Types.Transaction1559 = {
             nonce;
             chainId;
             maxPriorityFeePerGas;
@@ -34,14 +34,14 @@ module {
             r = "0x00";
             s = "0x00";
         };
-        switch(Transaction.serialize(#EIP1559(?tx))) {
+        switch (Transaction.serialize(#EIP1559(?tx))) {
             case (#err(msg)) {
                 return #err(msg);
             };
             case (#ok(rawTx)) {
                 return await* Transaction.signRawTx(
                     rawTx, chainId, keyName, derivationPath, publicKey, context, api);
-            };
         };
     };
+};
 }
