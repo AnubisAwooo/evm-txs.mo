@@ -90,7 +90,7 @@ module {
     ) : [Nat8] {
         switch (Rlp.encode(deserializeAccessList(accessList))) {
             case (#ok(res)) {
-                return Buffer.toArray(res); // maybe wrong: buffer of array ?
+                return Buffer.toArray(res);
             };
             case (#err(_)) {
                 return []
