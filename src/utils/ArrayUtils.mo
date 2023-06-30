@@ -7,6 +7,7 @@ import Nat8 "mo:base/Nat8";
 import Char "mo:base/Char";
 import Iter "mo:base/Iter";
 import Text "mo:base/Text";
+import Int8 "mo:base/Int8";
 import CU "CharUtils";
 
 module {
@@ -103,15 +104,33 @@ module {
         let res = Buffer.Buffer<Nat8>(8);
         
         // WebAssembly is little-endian and the evm is big-endian, so a conversion is needed
-        var val = value;
-        var hasLeading = false;
-        while(val > 0) {
-            let byte = (val >> 56) & 0xff;
-            val <<= 8;
-            if(hasLeading or byte != 0) {
-                res.add(Nat8.fromNat(Nat64.toNat(byte)));
-                hasLeading := true;
-            };
+        // var val = value;
+        // var hasLeading = false;
+        // while(val > 0) {
+        //     let byte = (val >> 56) & 0xff;
+        //     val <<= 8;
+        //     if(hasLeading or byte != 0) {
+        //         res.add(Nat8.fromNat(Nat64.toNat(byte)));
+        //         hasLeading := true;
+        //     };
+        // };
+
+        var array : [var Nat8] = Array.init<Nat8>(8, 0);
+        var first : Nat = 7;
+        var i : Int8 = 7;
+        while (0 <= i) {
+            let v = value >> Nat64.fromNat(Nat8.toNat(Int8.toNat8(((7 - i) * 8))));
+            let byte : Nat64 = v & 0xff;
+            let ii = Nat8.toNat(Int8.toNat8(i));
+            array[ii] := Nat8.fromNat(Nat64.toNat(byte));
+            if (byte != 0) first := ii;
+            i := i - 1;
+        };
+
+        var ii = first;
+        while (ii < 8) {
+            res.add(array[ii]);
+            ii := ii + 1;
         };
 
         return Buffer.toArray(res);
