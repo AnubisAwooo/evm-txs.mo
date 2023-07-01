@@ -10,6 +10,7 @@ import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Int8 "mo:base/Int8";
 import CU "CharUtils";
+import Types "../Types";
 
 module {
     public func fill<T>(
@@ -85,6 +86,25 @@ module {
         };
 
         return Buffer.toArray(res);
+    };
+
+    public func toU256(array : [Nat8]) : Types.U256 {
+        return array;
+    };
+    public func fromU256(value : Types.U256) : [Nat8] {
+        value;
+    };
+    public func toH160(array : [Nat8]) : Types.H160 {
+        return array;
+    };
+    public func fromH160(value : Types.H160) : [Nat8] {
+        value;
+    };
+    public func toBytes(array : [Nat8]) : Types.Bytes {
+        return array;
+    };
+    public func fromBytes(value : Types.Bytes) : [Nat8] {
+        value;
     };
 
     public func toNat(array : [Nat8]) : Nat {

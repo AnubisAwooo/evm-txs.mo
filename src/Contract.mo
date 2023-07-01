@@ -8,15 +8,15 @@ import EcdsaApi "interfaces/EcdsaApi";
 
 module {
     public func signDeployment(
-        bytecode : [Nat8],
-        maxPriorityFeePerGas : Nat,
-        gasLimit : Nat,
-        maxFeePerGas : Nat,
+        bytecode : Types.Bytes,
+        maxPriorityFeePerGas : Types.U256,
+        gasLimit : Types.U256,
+        maxFeePerGas : Types.U256,
         chainId : Nat64,
         keyName : Text,
         derivationPath : [Blob],
         publicKey : [Nat8],
-        nonce : Nat,
+        nonce : Types.U256,
         context : Ecmult.ECMultContext,
         api: EcdsaApi.API
     ) : async* Result.Result<(Types.TransactionType, [Nat8]), Text> {
@@ -26,9 +26,9 @@ module {
             maxPriorityFeePerGas;
             maxFeePerGas;
             gasLimit;
-            to = "0x";
-            value = 0;
-            data = "0x" # AU.toText(bytecode);
+            to = [];
+            value = Types.nat_to_u256(0);
+            data = bytecode;
             accessList = [];
             v = "0x00";
             r = "0x00";

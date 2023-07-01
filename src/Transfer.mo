@@ -35,15 +35,15 @@ module {
     public func signTransferERC20(
         address : Text,
         value : Nat,
-        contractAddress : Text,
-        maxPriorityFeePerGas : Nat,
-        gasLimit : Nat,
-        maxFeePerGas : Nat,
+        contractAddress : Types.H160,
+        maxPriorityFeePerGas : Types.U256,
+        gasLimit : Types.U256,
+        maxFeePerGas : Types.U256,
         chainId : Nat64,
         keyName : Text,
         derivationPath : [Blob],
         publicKey : [Nat8],
-        nonce : Nat,
+        nonce : Types.U256,
         ctx : Ecmult.ECMultContext,
         api: EcdsaApi.API
     ) : async* Result.Result<(Types.TransactionType, [Nat8]), Text> {
@@ -59,8 +59,8 @@ module {
                     maxFeePerGas;
                     gasLimit;
                     to = contractAddress;
-                    value = 0;
-                    data = "0x" # data;
+                    value = Types.nat_to_u256(0);
+                    data = AU.fromText(data);
                     accessList = [];
                     v = "0x00";
                     r = "0x00";

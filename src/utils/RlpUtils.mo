@@ -2,6 +2,7 @@ import Buffer "mo:base/Buffer";
 import Nat "mo:base/Nat";
 import RlpTypes "mo:rlp-anubis/types";
 import AU "ArrayUtils";
+import Types "../Types";
 
 module {
     public func getAsValue(
@@ -15,6 +16,22 @@ module {
                 return [];
             };
         };
+    };
+
+    public func getAsU256(
+        dec : RlpTypes.Decoded
+    ) : Types.U256 {
+        return AU.toU256(getAsValue(dec));
+    };
+    public func getAsH160(
+        dec : RlpTypes.Decoded
+    ) : Types.H160 {
+        return AU.toH160(getAsValue(dec));
+    };
+    public func getAsBytes(
+        dec : RlpTypes.Decoded
+    ) : Types.Bytes {
+        return AU.toBytes(getAsValue(dec));
     };
 
     public func getAsNat(

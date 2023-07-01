@@ -2,6 +2,7 @@ import Address "../../../../src/Address";
 import Contract "../../../../src/Contract";
 import Transaction "../../../../src/Transaction";
 import Context "../../../../src/Context";
+import LibTypes "../../../../src/Types";
 
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
@@ -98,11 +99,21 @@ shared ({ caller = owner }) actor class TxTools(
             case (?key) key;
         };
 
-        switch(await* Contract.signDeployment(
+        switch (
+            await* Contract.signDeployment(
                 bytecode,
-            max_priority_fee_per_gas, gas_limit, max_fee_per_gas, chain_id, 
-            keyName, derivationPath, user.publicKey, user.nonce, 
-            ecCtx, icEcdsaApi)) {
+                LibTypes.nat_to_u256(max_priority_fee_per_gas),
+                LibTypes.nat_to_u256(gas_limit),
+                LibTypes.nat_to_u256(max_fee_per_gas),
+                chain_id,
+                keyName,
+                derivationPath,
+                user.publicKey,
+                LibTypes.nat_to_u256(user.nonce),
+                ecCtx,
+                icEcdsaApi,
+            )
+        ) {
             case (#err(msg)) {
                 return #err(msg);
             };

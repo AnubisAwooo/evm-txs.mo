@@ -26,12 +26,12 @@ module EIP2930 {
                 switch (dec) {
                     case (#Nested(list)) {
                         let chainId = RlpUtils.getAsNat64(list.get(0));
-                        let nonce = RlpUtils.getAsNat(list.get(1));
-                        let gasPrice = RlpUtils.getAsNat(list.get(2));
-                        let gasLimit = RlpUtils.getAsNat(list.get(3));
-                        let to = RlpUtils.getAsText(list.get(4));
-                        let value = RlpUtils.getAsNat(list.get(5));
-                        let dataTx = RlpUtils.getAsText(list.get(6));
+                        let nonce = RlpUtils.getAsU256(list.get(1));
+                        let gasPrice = RlpUtils.getAsU256(list.get(2));
+                        let gasLimit = RlpUtils.getAsU256(list.get(3));
+                        let to = RlpUtils.getAsH160(list.get(4));
+                        let value = RlpUtils.getAsU256(list.get(5));
+                        let dataTx = RlpUtils.getAsBytes(list.get(6));
                         let accessList = Helper.serializeAccessList(list.get(7));
                         let v = RlpUtils.getAsText(list.get(8));
                         let r = RlpUtils.getAsText(list.get(9));
@@ -65,12 +65,12 @@ module EIP2930 {
 
         let items : [[Nat8]] = [
             AU.fromNat64(tx.chainId),
-            AU.fromNat(tx.nonce),
-            AU.fromNat(tx.gasPrice),
-            AU.fromNat(tx.gasLimit),
-            AU.fromText(tx.to),
-            AU.fromNat(tx.value),
-            AU.fromText(tx.data),
+            AU.fromU256(tx.nonce),
+            AU.fromU256(tx.gasPrice),
+            AU.fromU256(tx.gasLimit),
+            AU.fromH160(tx.to),
+            AU.fromU256(tx.value),
+            AU.fromBytes(tx.data),
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size() + 1);
@@ -209,12 +209,12 @@ module EIP2930 {
 
         let items : [[Nat8]] = [
             AU.fromNat64(tx.chainId),
-            AU.fromNat(tx.nonce),
-            AU.fromNat(tx.gasPrice),
-            AU.fromNat(tx.gasLimit),
-            AU.fromText(tx.to),
-            AU.fromNat(tx.value),
-            AU.fromText(tx.data),
+            AU.fromU256(tx.nonce),
+            AU.fromU256(tx.gasPrice),
+            AU.fromU256(tx.gasLimit),
+            AU.fromH160(tx.to),
+            AU.fromU256(tx.value),
+            AU.fromBytes(tx.data),
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size() + 4);

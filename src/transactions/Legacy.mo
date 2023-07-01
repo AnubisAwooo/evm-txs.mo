@@ -25,12 +25,12 @@ module Legacy {
             case (#ok(dec)) {
                 switch (dec) {
                     case (#Nested(list)) {
-                        let nonce = RlpUtils.getAsNat(list.get(0));
-                        let gasPrice = RlpUtils.getAsNat(list.get(1));
-                        let gasLimit = RlpUtils.getAsNat(list.get(2));
-                        let to = RlpUtils.getAsText(list.get(3));
-                        let value = RlpUtils.getAsNat(list.get(4));
-                        let dataTx = RlpUtils.getAsText(list.get(5));
+                        let nonce = RlpUtils.getAsU256(list.get(0));
+                        let gasPrice = RlpUtils.getAsU256(list.get(1));
+                        let gasLimit = RlpUtils.getAsU256(list.get(2));
+                        let to = RlpUtils.getAsH160(list.get(3));
+                        let value = RlpUtils.getAsU256(list.get(4));
+                        let dataTx = RlpUtils.getAsBytes(list.get(5));
                         let v = RlpUtils.getAsText(list.get(6));
                         let r = RlpUtils.getAsText(list.get(7));
                         let s = RlpUtils.getAsText(list.get(8));
@@ -63,12 +63,12 @@ module Legacy {
     ) : Result.Result<[Nat8], Text> {
 
         let items : [[Nat8]] = [
-            AU.fromNat(tx.nonce),
-            AU.fromNat(tx.gasPrice),
-            AU.fromNat(tx.gasLimit),
-            AU.fromText(tx.to),
-            AU.fromNat(tx.value),
-            AU.fromText(tx.data),
+            AU.fromU256(tx.nonce),
+            AU.fromU256(tx.gasPrice),
+            AU.fromU256(tx.gasLimit),
+            AU.fromH160(tx.to),
+            AU.fromU256(tx.value),
+            AU.fromBytes(tx.data),
             AU.fromNat64(tx.chainId),
         ];
 
@@ -209,12 +209,12 @@ module Legacy {
     ) : Result.Result<[Nat8], Text> {
 
         let items : [[Nat8]] = [
-            AU.fromNat(tx.nonce),
-            AU.fromNat(tx.gasPrice),
-            AU.fromNat(tx.gasLimit),
-            AU.fromText(tx.to),
-            AU.fromNat(tx.value),
-            AU.fromText(tx.data),
+            AU.fromU256(tx.nonce),
+            AU.fromU256(tx.gasPrice),
+            AU.fromU256(tx.gasLimit),
+            AU.fromH160(tx.to),
+            AU.fromU256(tx.value),
+            AU.fromBytes(tx.data),
             AU.fromText(tx.v),
             AU.fromText(tx.r),
             AU.fromText(tx.s)

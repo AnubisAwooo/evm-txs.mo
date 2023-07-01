@@ -26,13 +26,13 @@ module EIP1559 {
                 switch (dec) {
                     case (#Nested(list)) {
                         let chainId = RlpUtils.getAsNat64(list.get(0));
-                        let nonce = RlpUtils.getAsNat(list.get(1));
-                        let maxPriorityFeePerGas = RlpUtils.getAsNat(list.get(2));
-                        let maxFeePerGas = RlpUtils.getAsNat(list.get(3));
-                        let gasLimit = RlpUtils.getAsNat(list.get(4));
-                        let to = RlpUtils.getAsText(list.get(5));
-                        let value = RlpUtils.getAsNat(list.get(6));
-                        let dataTx = RlpUtils.getAsText(list.get(7));
+                        let nonce = RlpUtils.getAsU256(list.get(1));
+                        let maxPriorityFeePerGas = RlpUtils.getAsBytes(list.get(2));
+                        let maxFeePerGas = RlpUtils.getAsBytes(list.get(3));
+                        let gasLimit = RlpUtils.getAsBytes(list.get(4));
+                        let to = RlpUtils.getAsH160(list.get(5));
+                        let value = RlpUtils.getAsBytes(list.get(6));
+                        let dataTx = RlpUtils.getAsBytes(list.get(7));
                         let accessList = Helper.serializeAccessList(list.get(8));
                         let v = RlpUtils.getAsText(list.get(9));
                         let r = RlpUtils.getAsText(list.get(10));
@@ -67,13 +67,13 @@ module EIP1559 {
 
         let items : [[Nat8]] = [
             AU.fromNat64(tx.chainId),
-            AU.fromNat(tx.nonce),
-            AU.fromNat(tx.maxPriorityFeePerGas),
-            AU.fromNat(tx.maxFeePerGas),
-            AU.fromNat(tx.gasLimit),
-            AU.fromText(tx.to),
-            AU.fromNat(tx.value),
-            AU.fromText(tx.data),
+            AU.fromU256(tx.nonce),
+            AU.fromU256(tx.maxPriorityFeePerGas),
+            AU.fromU256(tx.maxFeePerGas),
+            AU.fromU256(tx.gasLimit),
+            AU.fromH160(tx.to),
+            AU.fromU256(tx.value),
+            AU.fromBytes(tx.data),
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size());
@@ -211,13 +211,13 @@ module EIP1559 {
     ) : Result.Result<[Nat8], Text> {
         let items : [[Nat8]] = [
             AU.fromNat64(tx.chainId),
-            AU.fromNat(tx.nonce),
-            AU.fromNat(tx.maxPriorityFeePerGas),
-            AU.fromNat(tx.maxFeePerGas),
-            AU.fromNat(tx.gasLimit),
-            AU.fromText(tx.to),
-            AU.fromNat(tx.value),
-            AU.fromText(tx.data),
+            AU.fromU256(tx.nonce),
+            AU.fromU256(tx.maxPriorityFeePerGas),
+            AU.fromU256(tx.maxFeePerGas),
+            AU.fromU256(tx.gasLimit),
+            AU.fromH160(tx.to),
+            AU.fromU256(tx.value),
+            AU.fromBytes(tx.data),
         ];
 
         let buf = Buffer.Buffer<RlpTypes.Input>(items.size() + 4);
