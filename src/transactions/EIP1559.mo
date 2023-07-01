@@ -27,11 +27,11 @@ module EIP1559 {
                     case (#Nested(list)) {
                         let chainId = RlpUtils.getAsNat64(list.get(0));
                         let nonce = RlpUtils.getAsU256(list.get(1));
-                        let maxPriorityFeePerGas = RlpUtils.getAsBytes(list.get(2));
-                        let maxFeePerGas = RlpUtils.getAsBytes(list.get(3));
-                        let gasLimit = RlpUtils.getAsBytes(list.get(4));
+                        let maxPriorityFeePerGas = RlpUtils.getAsU256(list.get(2));
+                        let maxFeePerGas = RlpUtils.getAsU256(list.get(3));
+                        let gasLimit = RlpUtils.getAsU256(list.get(4));
                         let to = RlpUtils.getAsH160(list.get(5));
-                        let value = RlpUtils.getAsBytes(list.get(6));
+                        let value = RlpUtils.getAsU256(list.get(6));
                         let dataTx = RlpUtils.getAsBytes(list.get(7));
                         let accessList = Helper.serializeAccessList(list.get(8));
                         let v = RlpUtils.getAsText(list.get(9));

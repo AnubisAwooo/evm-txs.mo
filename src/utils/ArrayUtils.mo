@@ -9,6 +9,7 @@ import Char "mo:base/Char";
 import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Int8 "mo:base/Int8";
+import Prelude "mo:base/Prelude";
 import CU "CharUtils";
 import Types "../Types";
 
@@ -89,10 +90,38 @@ module {
     };
 
     public func toU256(array : [Nat8]) : Types.U256 {
-        return array;
+        let buffer = Buffer.Buffer<Nat8>(32);
+        let size = array.size();
+        var i = 0;
+        while (i < 32) {
+            if (i + size >= 32) {
+                buffer.add(array[i + size - 32]);
+            } else {
+                buffer.add(0);
+            };
+            i := i + 1;
+        };
+        Buffer.toArray(buffer);
     };
     public func fromU256(value : Types.U256) : [Nat8] {
-        value;
+        if (value.size() != 32) {
+            Prelude.unreachable();
+        };
+
+        let buffer = Buffer.Buffer<Nat8>(1);
+        var load = false;
+        var i = 0;
+        while (i < 32) {
+            let byte = value[i];
+            if (load) {
+                buffer.add(byte);
+            } else if (byte != 0) {
+                buffer.add(byte);
+                load := true;
+            };
+            i := i + 1;
+        };
+        Buffer.toArray(buffer);
     };
     public func toH160(array : [Nat8]) : Types.H160 {
         return array;
