@@ -1,5 +1,4 @@
-{ 
-    dependencies = [ "base", "rlp-anubis", "libsecp256k1", "sha3"],
-    compiler = Some "0.8.6"
-}
+let mainVessel = ../vessel.dhall
 
+in mainVessel
+  with dependencies = mainVessel.dependencies # [ "testing" ]
